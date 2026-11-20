@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TRACKING - Lacak Pengiriman</title>
+<style>
+*{box-sizing:border-box;font-family:Arial,sans-serif}
+body{margin:0;background:#eef2f7;color:#222}
+header{background:#0b5ed7;color:#fff;padding:22px 16px;text-align:center}
+header .logo{font-size:32px}
+header h1{margin:6px 0 4px;font-size:24px}
+header p{margin:0;opacity:.9;font-size:14px}
+nav{display:flex;gap:8px;justify-content:center;background:#fff;padding:10px;position:sticky;top:0;z-index:10;box-shadow:0 2px 10px rgba(0,0,0,.06)}
+nav button{border:0;padding:10px 16px;border-radius:20px;cursor:pointer;font-weight:bold;background:#eef2f7}
+nav button.active{background:#0b5ed7;color:#fff}
+.wrap{max-width:720px;margin:16px auto;padding:0 12px 30px}
+.card{background:#fff;border-radius:14px;padding:20px;box-shadow:0 6px 20px rgba(0,0,0,.07);margin-bottom:14px}
+label{font-weight:bold;font-size:13px}
+input,select,textarea{width:100%;padding:12px;border:1px solid #ddd;border-radius:10px;margin:8px 0 12px;font-size:15px}
+.btn{width:100%;padding:13px;border:0;border-radius:10px;background:#0b5ed7;color:#fff;font-weight:bold;font-size:15px;cursor:pointer}
+.btn.green{background:#25D366}
+.btn.dark{background:#111}
+.btn.small{width:auto;padding:8px 12px;font-size:13px}
+.hidden{display:none}
+.badge{display:inline-block;padding:6px 12px;border-radius:20px;font-size:12px;font-weight:bold}
+.badge.proses{background:#fff3cd;color:#8a6d00}
+.badge.kirim{background:#cfe2ff;color:#0b5ed7}
+.badge.sampai{background:#d1e7dd;color:#0f5132}
+.badge.batal{background:#f8d7da;color:#842029}
+.timeline{border-left:3px solid #0b5ed7;padding-left:16px;margin-top:14px}
+.timeline div{margin-bottom:14px}
+.timeline b{display:block}
+.timeline span{color:#666;font-size:13px}
+.flex{display:flex;gap:8px;flex-wrap:wrap}
+.item{border:1px solid #eee;border-radius:12px;padding:12px;margin-bottom:10px}
+.item b{font-size:15px}
+.muted{color:#666;font-size:13px}
+.footer{text-align:center;color:#888;font-size:12px;margin-top:20px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+td,th{border-bottom:1px solid #eee;padding:8px;text-align:left}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">📦</div>
+  <h1 id="namaToko">TOKO MAKASSAR EXPRESS</h1>
+  <p>Lacak pengiriman cepat, aman, dan terpercaya</p>
+</header>
+
+<nav>
+  <button id="btnLacak" class="active" onclick="showPage('lacak')">🔍 Lacak Paket</button>
+  <button id="btnAdmin" onclick="showPage('admin')">⚙️ Admin</button>
+  <button id="btnInfo" onclick="showPage('info')">ℹ️ Info</button>
+</nav>
+
+<div class="wrap">
+
+<!-- HALAMAN LACAK -->
+<div id="page-lacak">
+  <div class="card">
+    <h2 style="margin-top:0">Cek Resi Pengiriman</h2>
+    <label>Nomor Resi</label>
+    <input id="inputResi" placeholder="Contoh: MK123456">
+    <label>Ekspedisi</label>
+    <select id="inputEkspedisi">
+      <option>JNE</option><option>J&T Express</option><option>SiCepat</option>
+      <option>Anteraja</option><option>Pos Indonesia</option><option>GoSend</option>
+      <option>GrabExpress</option><option>Ninja Xpress</option><option>ID Express</option>
+    </select>
+    <button class="btn" onclick="lacakPaket()">LACAK SEKARANG</button>
+    <p class="muted">Contoh resi demo: <b>MK123456</b> , <b>JP987654</b></p>
+  </div>
+
+  <div id="hasil" class="card hidden">
+    <div id="hasilHeader"></div>
+    <div class="timeline" id="hasilTimeline"></div>
+    <div class="flex" style="margin-top:14px">
+      <button class="btn green small" onclick="cekWA()">💬 Tanya via WhatsApp</button>
+      <button class="btn dark small" onclick="salinResi()">📋 Salin Resi</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3 style="margin-top:0">Riwayat Pencarian Terakhir</h3>
+    <div id="riwayat"></div>
+  </div>
+</div>
+
+<!-- HALAMAN ADMIN -->
+<div id="page-admin" class="hidden">
+  <div class="card">
+    <h2 style="margin-top:0">Tambah / Update Paket</h2>
+    <label>Nomor Resi</label><input id="aResi" placeholder="MK123456">
+    <label>Nama Penerima</label><input id="aNama" placeholder="Nama pembeli">
+    <label>Kota Tujuan</label><input id="aKota" placeholder="Contoh: Jakarta">
+    <label>Ekspedisi</label>
+    <select id="aEkspedisi"><option>JNE</option><option>J&T Express</option><option>SiCepat</option><option>Anteraja</option><option>Pos Indonesia</option></select>
+    <label>Status</label>
+    <select id="aStatus"><option>Pesanan Diproses</option><option>Dalam Perjalanan</option><option>Sampai di Kota Tujuan</option><option>Sedang Diantar Kurir</option><option>Paket Diterima</option></select>
+    <label>Catatan / Update Terakhir</label><textarea id="aCatatan" rows="2" placeholder="Contoh: Paket sudah tiba di gudang Jakarta"></textarea>
+    <button class="btn" onclick="simpanPaket()">SIMPAN PAKET</button>
+  </div>
+
+  <div class="card">
+    <h3 style="margin-top:0">Daftar Paket</h3>
+    <div id="daftarPaket"></div>
+    <button class="btn dark" onclick="resetDemo()" style="margin-top:12px">Reset ke Data Demo</button>
+  </div>
+
+  <div class="card">
+    <h3 style="margin-top:0">Pengaturan Toko</h3>
+    <label>Nama Toko</label><input id="setNama" value="TOKO MAKASSAR EXPRESS">
+    <label>Nomor WhatsApp (62...)</label><input id="setWA" value="6281234567890">
+    <button class="btn" onclick="simpanPengaturan()">SIMPAN PENGATURAN</button>
+  </div>
+</div>
+
+<!-- HALAMAN INFO -->
+<div id="page-info" class="hidden">
+  <div class="card">
+    <h2 style="margin-top:0">Info Pengiriman</h2>
+    <table>
+      <tr><th>Layanan</th><th>Estimasi</th></tr>
+      <tr><td>Dalam Kota Makassar</td><td>Same Day / 1 Hari</td></tr>
+      <tr><td>Antar Pulau Sulawesi</td><td>2 - 3 Hari</td></tr>
+      <tr><td>Jawa / Sumatera</td><td>3 - 5 Hari</td></tr>
+      <tr><td>Kalimantan / Papua</td><td>4 - 7 Hari</td></tr>
+    </table>
+    <p class="muted">Jam operasional: Senin - Sabtu, 08.00 - 20.00 WITA</p>
+    <button class="btn green" onclick="cekWA()">Chat WhatsApp Admin</button>
+  </div>
+</div>
+
+<div class="footer">© 2026 Toko Makassar Express - Lacak Pengiriman</div>
+</div>
+
+<script>
+// DATA AWAL DEMO
+let defaultData = {
+  "MK123456": {nama:"Andi Pratama", kota:"Jakarta", ekspedisi:"JNE", status:"Dalam Perjalanan", history:[
+    {t:"Pesanan dibuat dan paket dikemas", w:"20 Nov 2026, 09:00"},
+    {t:"Paket diterima di gudang Makassar", w:"20 Nov 2026, 11:30"},
+    {t:"Paket dalam perjalanan ke Jakarta", w:"20 Nov 2026, 14:00"}
+  ]},
+  "JP987654": {nama:"Siti Rahma", kota:"Surabaya", ekspedisi:"J&T Express", status:"Paket Diterima", history:[
+    {t:"Pesanan dibuat", w:"18 Nov 2026, 10:00"},
+    {t:"Paket dalam perjalanan", w:"18 Nov 2026, 13:00"},
+    {t:"Paket sampai di Surabaya", w:"19 Nov 2026, 09:00"},
+    {t:"Paket diterima oleh Siti Rahma", w:"19 Nov 2026, 11:20"}
+  ]}
+};
+
+let paket = JSON.parse(localStorage.getItem('paket_data') || JSON.stringify(defaultData));
+let riwayat = JSON.parse(localStorage.getItem('riwayat_data') || "[]");
+let namaToko = localStorage.getItem('nama_toko') || "TOKO MAKASSAR EXPRESS";
+let noWA = localStorage.getItem('no_wa') || "6281234567890";
+document.getElementById('namaToko').innerText = namaToko;
+document.getElementById('setNama').value = namaToko;
+document.getElementById('setWA').value = noWA;
+
+function save(){ localStorage.setItem('paket_data', JSON.stringify(paket)); localStorage.setItem('riwayat_data', JSON.stringify(riwayat)); }
+
+function showPage(p){
+  ['lacak','admin','info'].forEach(x=>{
+    document.getElementById('page-'+x).classList.toggle('hidden', x!==p);
+    document.getElementById('btn'+x.charAt(0).toUpperCase()+x.slice(1)).classList.toggle('active', x===p);
+  });
+  if(p==='admin') renderAdmin();
+  if(p==='lacak') renderRiwayat();
+}
+
+function badge(status){
+  let c='proses';
+  if(status.includes('Perjalanan')||status.includes('Diantar')) c='kirim';
+  if(status.includes('Diterima')) c='sampai';
+  return `<span class="badge ${c}">${status}</span>`;
+}
+
+function lacakPaket(){
+  let resi = document.getElementById('inputResi').value.trim().toUpperCase();
+  let eksp = document.getElementById('inputEkspedisi').value;
+  if(!resi){ alert('Masukkan nomor resi dulu!'); return; }
+  let data = paket[resi];
+  let hasil = document.getElementById('hasil');
+  hasil.classList.remove('hidden');
+  if(!data){
+    document.getElementById('hasilHeader').innerHTML = `<b>Resi ${resi} tidak ditemukan</b><p class="muted">Resi belum diinput admin. Coba resi demo: MK123456</p>`;
+    document.getElementById('hasilTimeline').innerHTML = '';
+  } else {
+    document.getElementById('hasilHeader').innerHTML = `
+      <div>Resi: <b>${resi}</b> | ${data.ekspedisi}</div>
+      <div style="margin:8px 0">Penerima: <b>${data.nama}</b> - ${data.kota}</div>
+      ${badge(data.status)}
+      <p class="muted">Estimasi: 1-5 hari kerja tergantung kota tujuan</p>`;
+    document.getElementById('hasilTimeline').innerHTML = data.history.map(h=>`<div><b>${h.t}</b><span>${h.w}</span></div>`).join('');
+    if(!riwayat.includes(resi)){ riwayat.unshift(resi); riwayat = riwayat.slice(0,5); save(); renderRiwayat(); }
+  }
+  hasil.scrollIntoView({behavior:'smooth'});
+}
+
+function renderRiwayat(){
+  let el = document.getElementById('riwayat');
+  if(riwayat.length===0){ el.innerHTML='<p class="muted">Belum ada riwayat.</p>'; return; }
+  el.innerHTML = riwayat.map(r=>`<div class="item"><b>${r}</b> - ${paket[r]?paket[r].status:'Tidak ditemukan'} <button class="btn small" onclick="isiResi('${r}')">Cek Lagi</button></div>`).join('');
+}
+function isiResi(r){ document.getElementById('inputResi').value=r; lacakPaket(); }
+function salinResi(){ let r=document.getElementById('inputResi').value; navigator.clipboard.writeText(r); alert('Resi disalin: '+r); }
+function cekWA(){ let r=document.getElementById('inputResi').value||'-'; window.open(`https://wa.me/${noWA}?text=${encodeURIComponent('Halo, saya mau cek paket resi '+r)}`,'_blank'); }
+
+function simpanPaket(){
+  let resi=document.getElementById('aResi').value.trim().toUpperCase();
+  let nama=document.getElementById('aNama').value.trim();
+  let kota=document.getElementById('aKota').value.trim();
+  let eksp=document.getElementById('aEkspedisi').value;
+  let status=document.getElementById('aStatus').value;
+  let catatan=document.getElementById('aCatatan').value.trim()||status;
+  if(!resi||!nama){ alert('Isi resi dan nama penerima!'); return; }
+  let now=new Date().toLocaleString('id-ID');
+  if(!paket[resi]) paket[resi]={nama,kota,ekspedisi:eksp,status,history:[]};
+  paket[resi].nama=nama; paket[resi].kota=kota; paket[resi].ekspedisi=eksp; paket[resi].status=status;
+  paket[resi].history.push({t:catatan,w:now});
+  save(); renderAdmin(); alert('Paket berhasil disimpan!');
+  document.getElementById('aResi').value=''; document.getElementById('aNama').value=''; document.getElementById('aKota').value=''; document.getElementById('aCatatan').value='';
+}
+
+function renderAdmin(){
+  let el=document.getElementById('daftarPaket');
+  let keys=Object.keys(paket);
+  if(keys.length===0){ el.innerHTML='<p class="muted">Belum ada paket.</p>'; return; }
+  el.innerHTML=keys.map(k=>{
+    let p=paket[k];
+    return `<div class="item"><b>${k}</b> - ${p.nama} (${p.kota})<br>${badge(p.status)}<br><span class="muted">${p.history[p.history.length-1]?.t||''}</span><br><br><button class="btn small" onclick="editPaket('${k}')">Edit</button> <button class="btn small dark" onclick="hapusPaket('${k}')">Hapus</button></div>`
+  }).join('');
+}
+function editPaket(k){ let p=paket[k]; document.getElementById('aResi').value=k; document.getElementById('aNama').value=p.nama; document.getElementById('aKota').value=p.kota; document.getElementById('aEkspedisi').value=p.ekspedisi; document.getElementById('aStatus').value=p.status; window.scrollTo({top:0,behavior:'smooth'}); }
+function hapusPaket(k){ if(confirm('Hapus '+k+'?')){ delete paket[k]; save(); renderAdmin(); } }
+function resetDemo(){ if(confirm('Reset ke data demo?')){ paket=JSON.parse(JSON.stringify(defaultData)); save(); renderAdmin(); } }
+function simpanPengaturan(){ namaToko=document.getElementById('setNama').value; noWA=document.getElementById('setWA').value; localStorage.setItem('nama_toko',namaToko); localStorage.setItem('no_wa',noWA); document.getElementById('namaToko').innerText=namaToko; alert('Pengaturan disimpan!'); }
+
+renderRiwayat();
+</script>
+</body>
+</html>
