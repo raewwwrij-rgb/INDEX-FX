@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TRACKING - Lacak Pengiriman</title>
+<title>TOKO BAJU ONLINE SHOP - Lacak Pengiriman</title>
 <style>
 *{box-sizing:border-box;font-family:Arial,sans-serif}
 body{margin:0;background:#eef2f7;color:#222}
@@ -44,9 +44,9 @@ td,th{border-bottom:1px solid #eee;padding:8px;text-align:left}
 <body>
 
 <header>
-  <div class="logo">📦</div>
-  <h1 id="namaToko">TOKO MAKASSAR EXPRESS</h1>
-  <p>Lacak pengiriman cepat, aman, dan terpercaya</p>
+  <div class="logo">👕</div>
+  <h1 id="namaToko">TOKO BAJU ONLINE SHOP</h1>
+  <p>Lacak pengiriman baju kamu, cepat & terpercaya</p>
 </header>
 
 <nav>
@@ -57,7 +57,6 @@ td,th{border-bottom:1px solid #eee;padding:8px;text-align:left}
 
 <div class="wrap">
 
-<!-- HALAMAN LACAK -->
 <div id="page-lacak">
   <div class="card">
     <h2 style="margin-top:0">Cek Resi Pengiriman</h2>
@@ -88,7 +87,6 @@ td,th{border-bottom:1px solid #eee;padding:8px;text-align:left}
   </div>
 </div>
 
-<!-- HALAMAN ADMIN -->
 <div id="page-admin" class="hidden">
   <div class="card">
     <h2 style="margin-top:0">Tambah / Update Paket</h2>
@@ -111,135 +109,7 @@ td,th{border-bottom:1px solid #eee;padding:8px;text-align:left}
 
   <div class="card">
     <h3 style="margin-top:0">Pengaturan Toko</h3>
-    <label>Nama Toko</label><input id="setNama" value="TOKO MAKASSAR EXPRESS">
-    <label>Nomor WhatsApp (62...)</label><input id="setWA" value="6281234567890">
+    <label>Nama Toko</label><input id="setNama" value="TOKO BAJU ONLINE SHOP">
+    <label>Nomor WhatsApp (62...)</label><input id="setWA" value="6287747044140">
     <button class="btn" onclick="simpanPengaturan()">SIMPAN PENGATURAN</button>
-  </div>
-</div>
-
-<!-- HALAMAN INFO -->
-<div id="page-info" class="hidden">
-  <div class="card">
-    <h2 style="margin-top:0">Info Pengiriman</h2>
-    <table>
-      <tr><th>Layanan</th><th>Estimasi</th></tr>
-      <tr><td>Dalam Kota Makassar</td><td>Same Day / 1 Hari</td></tr>
-      <tr><td>Antar Pulau Sulawesi</td><td>2 - 3 Hari</td></tr>
-      <tr><td>Jawa / Sumatera</td><td>3 - 5 Hari</td></tr>
-      <tr><td>Kalimantan / Papua</td><td>4 - 7 Hari</td></tr>
-    </table>
-    <p class="muted">Jam operasional: Senin - Sabtu, 08.00 - 20.00 WITA</p>
-    <button class="btn green" onclick="cekWA()">Chat WhatsApp Admin</button>
-  </div>
-</div>
-
-<div class="footer">© 2026 Toko Makassar Express - Lacak Pengiriman</div>
-</div>
-
-<script>
-// DATA AWAL DEMO
-let defaultData = {
-  "MK123456": {nama:"Andi Pratama", kota:"Jakarta", ekspedisi:"JNE", status:"Dalam Perjalanan", history:[
-    {t:"Pesanan dibuat dan paket dikemas", w:"20 Nov 2026, 09:00"},
-    {t:"Paket diterima di gudang Makassar", w:"20 Nov 2026, 11:30"},
-    {t:"Paket dalam perjalanan ke Jakarta", w:"20 Nov 2026, 14:00"}
-  ]},
-  "JP987654": {nama:"Siti Rahma", kota:"Surabaya", ekspedisi:"J&T Express", status:"Paket Diterima", history:[
-    {t:"Pesanan dibuat", w:"18 Nov 2026, 10:00"},
-    {t:"Paket dalam perjalanan", w:"18 Nov 2026, 13:00"},
-    {t:"Paket sampai di Surabaya", w:"19 Nov 2026, 09:00"},
-    {t:"Paket diterima oleh Siti Rahma", w:"19 Nov 2026, 11:20"}
-  ]}
-};
-
-let paket = JSON.parse(localStorage.getItem('paket_data') || JSON.stringify(defaultData));
-let riwayat = JSON.parse(localStorage.getItem('riwayat_data') || "[]");
-let namaToko = localStorage.getItem('nama_toko') || "TOKO MAKASSAR EXPRESS";
-let noWA = localStorage.getItem('no_wa') || "6281234567890";
-document.getElementById('namaToko').innerText = namaToko;
-document.getElementById('setNama').value = namaToko;
-document.getElementById('setWA').value = noWA;
-
-function save(){ localStorage.setItem('paket_data', JSON.stringify(paket)); localStorage.setItem('riwayat_data', JSON.stringify(riwayat)); }
-
-function showPage(p){
-  ['lacak','admin','info'].forEach(x=>{
-    document.getElementById('page-'+x).classList.toggle('hidden', x!==p);
-    document.getElementById('btn'+x.charAt(0).toUpperCase()+x.slice(1)).classList.toggle('active', x===p);
-  });
-  if(p==='admin') renderAdmin();
-  if(p==='lacak') renderRiwayat();
-}
-
-function badge(status){
-  let c='proses';
-  if(status.includes('Perjalanan')||status.includes('Diantar')) c='kirim';
-  if(status.includes('Diterima')) c='sampai';
-  return `<span class="badge ${c}">${status}</span>`;
-}
-
-function lacakPaket(){
-  let resi = document.getElementById('inputResi').value.trim().toUpperCase();
-  let eksp = document.getElementById('inputEkspedisi').value;
-  if(!resi){ alert('Masukkan nomor resi dulu!'); return; }
-  let data = paket[resi];
-  let hasil = document.getElementById('hasil');
-  hasil.classList.remove('hidden');
-  if(!data){
-    document.getElementById('hasilHeader').innerHTML = `<b>Resi ${resi} tidak ditemukan</b><p class="muted">Resi belum diinput admin. Coba resi demo: MK123456</p>`;
-    document.getElementById('hasilTimeline').innerHTML = '';
-  } else {
-    document.getElementById('hasilHeader').innerHTML = `
-      <div>Resi: <b>${resi}</b> | ${data.ekspedisi}</div>
-      <div style="margin:8px 0">Penerima: <b>${data.nama}</b> - ${data.kota}</div>
-      ${badge(data.status)}
-      <p class="muted">Estimasi: 1-5 hari kerja tergantung kota tujuan</p>`;
-    document.getElementById('hasilTimeline').innerHTML = data.history.map(h=>`<div><b>${h.t}</b><span>${h.w}</span></div>`).join('');
-    if(!riwayat.includes(resi)){ riwayat.unshift(resi); riwayat = riwayat.slice(0,5); save(); renderRiwayat(); }
-  }
-  hasil.scrollIntoView({behavior:'smooth'});
-}
-
-function renderRiwayat(){
-  let el = document.getElementById('riwayat');
-  if(riwayat.length===0){ el.innerHTML='<p class="muted">Belum ada riwayat.</p>'; return; }
-  el.innerHTML = riwayat.map(r=>`<div class="item"><b>${r}</b> - ${paket[r]?paket[r].status:'Tidak ditemukan'} <button class="btn small" onclick="isiResi('${r}')">Cek Lagi</button></div>`).join('');
-}
-function isiResi(r){ document.getElementById('inputResi').value=r; lacakPaket(); }
-function salinResi(){ let r=document.getElementById('inputResi').value; navigator.clipboard.writeText(r); alert('Resi disalin: '+r); }
-function cekWA(){ let r=document.getElementById('inputResi').value||'-'; window.open(`https://wa.me/${noWA}?text=${encodeURIComponent('Halo, saya mau cek paket resi '+r)}`,'_blank'); }
-
-function simpanPaket(){
-  let resi=document.getElementById('aResi').value.trim().toUpperCase();
-  let nama=document.getElementById('aNama').value.trim();
-  let kota=document.getElementById('aKota').value.trim();
-  let eksp=document.getElementById('aEkspedisi').value;
-  let status=document.getElementById('aStatus').value;
-  let catatan=document.getElementById('aCatatan').value.trim()||status;
-  if(!resi||!nama){ alert('Isi resi dan nama penerima!'); return; }
-  let now=new Date().toLocaleString('id-ID');
-  if(!paket[resi]) paket[resi]={nama,kota,ekspedisi:eksp,status,history:[]};
-  paket[resi].nama=nama; paket[resi].kota=kota; paket[resi].ekspedisi=eksp; paket[resi].status=status;
-  paket[resi].history.push({t:catatan,w:now});
-  save(); renderAdmin(); alert('Paket berhasil disimpan!');
-  document.getElementById('aResi').value=''; document.getElementById('aNama').value=''; document.getElementById('aKota').value=''; document.getElementById('aCatatan').value='';
-}
-
-function renderAdmin(){
-  let el=document.getElementById('daftarPaket');
-  let keys=Object.keys(paket);
-  if(keys.length===0){ el.innerHTML='<p class="muted">Belum ada paket.</p>'; return; }
-  el.innerHTML=keys.map(k=>{
-    let p=paket[k];
-    return `<div class="item"><b>${k}</b> - ${p.nama} (${p.kota})<br>${badge(p.status)}<br><span class="muted">${p.history[p.history.length-1]?.t||''}</span><br><br><button class="btn small" onclick="editPaket('${k}')">Edit</button> <button class="btn small dark" onclick="hapusPaket('${k}')">Hapus</button></div>`
-  }).join('');
-}
-function editPaket(k){ let p=paket[k]; document.getElementById('aResi').value=k; document.getElementById('aNama').value=p.nama; document.getElementById('aKota').value=p.kota; document.getElementById('aEkspedisi').value=p.ekspedisi; document.getElementById('aStatus').value=p.status; window.scrollTo({top:0,behavior:'smooth'}); }
-function hapusPaket(k){ if(confirm('Hapus '+k+'?')){ delete paket[k]; save(); renderAdmin(); } }
-function resetDemo(){ if(confirm('Reset ke data demo?')){ paket=JSON.parse(JSON.stringify(defaultData)); save(); renderAdmin(); } }
-function simpanPengaturan(){ namaToko=document.getElementById('setNama').value; noWA=document.getElementById('setWA').value; localStorage.setItem('nama_toko',namaToko); localStorage.setItem('no_wa',noWA); document.getElementById('namaToko').innerText=namaToko; alert('Pengaturan disimpan!'); }
-
-renderRiwayat();
-</script>
-</body>
-</html>
+    <p class="muted">Nomor aktif
